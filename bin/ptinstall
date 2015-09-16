@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
 require "project_temple_installer"
-ProjectInstaller::install 
+ProjectInstaller.new().install 
