@@ -1,6 +1,7 @@
 require 'pathname'
+require "thor"
 require 'xcodeproj'
-class ProjectInstaller
+class ProjectInstaller < Thor
 
   def initialize(*args)
     @current_dir = Pathname.pwd
@@ -12,14 +13,19 @@ class ProjectInstaller
         break
       end
     end
+
+    super(*args)
   end
 
+  desc "install project temple", "install my project temple form github"
   def install 
     downloadFile
     source_group = @project.main_group.children[0]
     add_all_to_group "#{@current_dir}/Source", source_group
     @project.save
   end
+
+  private
 
   def downloadFile
     download_command = "svn export https://github.com/kaich/ProjectTemple/trunk/ProjectTemple/Source"
@@ -47,3 +53,4 @@ class ProjectInstaller
   end
 
 end
+ 
