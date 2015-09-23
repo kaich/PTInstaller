@@ -10,6 +10,8 @@ class ProjectInstaller < Thor
         project_path = "#{@current_dir}/#{filename}"
         @project_name = File.basename(filename) 
         @project = Xcodeproj::Project.open project_path 
+        @source_path = "#{@current_dir}/#{@project_name}/Source"
+        @pod_file_path = "#{@current_dir}/podfile"
         break
       end
     end
@@ -19,29 +21,38 @@ class ProjectInstaller < Thor
 
   desc "install project temple", "install my project temple form github"
   def install 
-    downloadFile
-    source_group = @project.main_group.children[0]
-    add_all_to_group "#{@current_dir}/Source", source_group
-    @project.save
+    if File.exist? @source_path
+      if $stdin.getc == 'y'
+        puts "Source directory exist, do you want to delete and continue(y or n) ?" 
+        downloadFile
+        source_group = @project.main_group.children[0]
+        add_all_to_group @source_path, source_group
+        @project.save
+      end 
+    else
+        downloadFile
+        source_group = @project.main_group.children[0]
+        add_all_to_group @source_path, source_group
+        @project.save
+    end
   end
 
   private
 
   def downloadFile
-    source_path = "#{@current_dir}/Source"
-    puts "Source directory exist, do you want to delete and continue(y or n) ?" if File.exist? source_path
-    if $stdin.getc == 'y'  
-      FileUtils.rm_rf  source_path
-      download_command = "svn export https://github.com/kaich/ProjectTemple/trunk/ProjectTemple/Source"
-      download_podfile = "svn export https://github.com/kaich/ProjectTemple/trunk/podfile"
-      system download_command
-      system download_podfile
-    end 
+
+    FileUtils.rm_rf  @source_path if File.exist? @source_path
+    FileUtils.rm_rf  @pod_file_path if File.exist? @pod_file_path
+    download_command = "svn export https://github.com/kaich/ProjectTemple/trunk/ProjectTemple/Source"
+    download_podfile = "svn export https://github.com/kaich/ProjectTemple/trunk/podfile"
+    system download_command
+    system download_podfile
+    FileUtils.mv "#{current_dir}/Source" , source_path
+
   end
 
   def add_all_to_group(path ,target_group)
     exist_sub_group = target_group["Source"]
-    puts "group ----------------------#{exist_sub_group}"
     if exist_sub_group 
        exist_sub_group.remove_from_project
     end
