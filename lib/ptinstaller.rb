@@ -28,10 +28,15 @@ class ProjectInstaller < Thor
   private
 
   def downloadFile
-    download_command = "svn export https://github.com/kaich/ProjectTemple/trunk/ProjectTemple/Source"
-    download_podfile = "svn export https://github.com/kaich/ProjectTemple/trunk/podfile"
-    system download_command
-    system download_podfile
+    source_path = "#{@current_dir}/Source"
+    puts "Source directory exist, do you want to delete and continue(y or n) ?" if File.exist? source_path
+    if $stdin.getc == 'y'  
+      FileUtils.rm_rf  source_path
+      download_command = "svn export https://github.com/kaich/ProjectTemple/trunk/ProjectTemple/Source"
+      download_podfile = "svn export https://github.com/kaich/ProjectTemple/trunk/podfile"
+      system download_command
+      system download_podfile
+    end 
   end
 
   def add_all_to_group(path ,target_group)
