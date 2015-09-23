@@ -40,6 +40,11 @@ class ProjectInstaller < Thor
   end
 
   def add_all_to_group(path ,target_group)
+    exist_sub_group = target_group["Source"]
+    puts "group ----------------------#{exist_sub_group}"
+    if exist_sub_group 
+       exist_sub_group.remove_from_project
+    end
     new_group = target_group.new_group(File.basename(path), path) if Dir.exist? path
     Dir.foreach(path) do |filename| 
       next if filename == "."              # 忽略当前目录
